@@ -1,70 +1,102 @@
 <html>
-	<head>
-		<title>Is it snowing in St. Johns</title>
-		<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2822592648025998" crossorigin="anonymous"></script>
-		<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-		<script type="text/javascript">
-		$(document).ready(function () {
-			$.ajax({
-	            dataType: 'json',
-	            //st johns
-	            url: "https://api.weather.gov/gridpoints/PQR/110,107/forecast",
-	            //in california somehwere
-	           	//url: "http://api.openweathermap.org/data/2.5/weather?lat=37.27&lon=-121.78",
-	            success: function (data, status, xhr) {
-	                var weather = data.properties.periods[0].shortForecast;
-	                var isSnowing = false;
-	                	if (weather == "Snow" || weather == "Light Snow" || weather == "Rain And Snow") {
-	                		isSnowing = true;
-	                	}
-			    else if (weather.toLowerCase().includes("snow")) {
-				    isSnowing = true;
-				}
-	                if (isSnowing) {
-	                	$("#yes").show();
-	                	$("#body").addClass("red");
-	                	$("#no").hide();
-	                }
-	                else {
-	                	$("#yes").hide();
-	                	$("#body").addClass("green");
-	                	$("#no").show();
-	                }
-			$("#weather").text(data.properties.periods[0].detailedForecast);
-			$("#icon").attr("src",data.properties.periods[0].icon);
-	            },
-	            error: function (jqXHR, textStatus, errorThrown) {
 
-	            }
-	        });
-		});
-		</script>
-		<style>
-			body.red {
-	        	background-color: red;
-	        }
-	        body.green {
-	        	background-color: green;
-	        }
-	        h1 {
-	 			color:white;
-	 			text-align: center;
-	 			margin-top: 100px;
-	        }
-        </style>
-	</head>
-	<body id="body">
-		<div id="yes" style="display:none" class="red">
-			<h1 class="yes"><span style='font-size:250px'>YES!</span><br />
-			<img src="snow.gif" /></h1>
-		</div>
-		<div id="no" style="display:none" class="green">
-			<h1 class="no"><span style='font-size:100px'>NO!</span></h1>
-		</div>
-		<div style="display:none;" id="content">
-			<img src="" id="icon"></img>
-			<div id="weather"></div>
+<head>
+  <title>Is it snowing in St. Johns</title>
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2822592648025998"
+    crossorigin="anonymous"></script>
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+  <script type="text/javascript">
+    // Constants
+    const API_URL = "https://api.weather.gov/gridpoints/PQR/110,107/forecast";
+    const SNOW_WORDS = ["Snow", "Light Snow", "Rain And Snow"];
 
-		</div>
-	</body>
+    $(document).ready(function () {
+      // Show loading GIF when AJAX request starts
+      $.ajaxSetup({
+        beforeSend: function () {
+          $('#loading').show();
+        },
+        complete: function () {
+          $('#loading').hide();
+        }
+      });
+
+      $.ajax({
+        dataType: 'json',
+        url: API_URL,
+        success: function (data) {
+          updateWeather(data);
+        },
+        error: function (jqXHR, textStatus, errorThrown) {
+          handleError(errorThrown);
+        }
+      });
+    });
+
+    function updateWeather(data) {
+      const weather = data.properties.periods[0].shortForecast;
+      const isSnowing = SNOW_WORDS.some(word => weather.toLowerCase().includes(word.toLowerCase()));
+
+      if (isSnowing) {
+        $('#yes').show();
+        $('#no').hide();
+        $('body').addClass('red');
+      } else {
+        $('#yes').hide();
+        $('#no').show();
+        $('body').removeClass('red').addClass('green');
+      }
+
+      $('#weatherContent').text(data.properties.periods[0].detailedForecast);
+      $('#icon').attr('src', data.properties.periods[0].icon);
+    }
+
+    function handleError(error) {
+      console.error("Error fetching weather data:", error);
+      $('#weatherContent').text("Failed to load weather information. Please try again later.");
+      $('body').addClass('green-background');
+    }
+  </script>
+  <style>
+    body.red {
+      background-color: red;
+    }
+
+    body.green {
+      background-color: green;
+    }
+
+    body.yellow {
+      background-color: yellow;
+    }
+
+    h1 {
+      color: white;
+      text-align: center;
+      margin-top: 100px;
+    }
+  </style>
+</head>
+
+<body id="body">
+  <div id="yes" style="display:none" class="red">
+    <h1 class="yes"><span style='font-size:250px'>YES!</span><br />
+      <img src="snow.gif" />
+    </h1>
+  </div>
+  <div id="no" style="display:none" class="green">
+    <h1 class="no"><span style='font-size:100px'>NO!</span></h1>
+  </div>
+  <div style="display:none;" id="content">
+    <img src="" id="icon"></img>
+    <div id="weather"></div>
+
+  </div>
+  <div id="loading"
+    style="display:none; position:fixed; top:50%; left:50%; transform:translate(-50%, -50%); z-index:999;"
+    class="yellow">
+    <img src="winter.gif" alt="Loading..." />
+  </div>
+</body>
+
 </html>
