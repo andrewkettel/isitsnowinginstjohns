@@ -5,6 +5,7 @@
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2822592648025998"
     crossorigin="anonymous"></script>
   <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+  <link rel="stylesheet" href="index.css" />
   <script type="text/javascript">
     // Constants
     const API_URL = "https://api.weather.gov/gridpoints/PQR/110,107/forecast";
@@ -31,6 +32,12 @@
           handleError(errorThrown);
         }
       });
+
+      // Toggle forecast visibility
+      $('#toggleForecast').click(function () {
+        $('#weeklyForecast').slideToggle();
+        $(this).text($(this).text() === 'Show Weekly Forecast' ? 'Hide Weekly Forecast' : 'Show Weekly Forecast');
+      });
     });
 
     function updateWeather(data) {
@@ -49,6 +56,31 @@
 
       $('#weatherContent').text(data.properties.periods[0].detailedForecast);
       $('#icon').attr('src', data.properties.periods[0].icon);
+
+      // Populate weekly forecast
+      const periods = data.properties.periods;
+      let forecastHTML = '';
+
+      for (let i = 0; i < Math.min(periods.length, 14); i++) {
+        const period = periods[i];
+        const hasSnow = SNOW_WORDS.some(word => period.shortForecast.toLowerCase().includes(word.toLowerCase()));
+        const snowIndicator = hasSnow ? '❄️ ' : '';
+
+        forecastHTML += `
+          <div class="forecast-item">
+            <div class="forecast-header">
+              <img src="${period.icon}" alt="${period.shortForecast}" class="forecast-icon">
+              <h3>${snowIndicator}${period.name}</h3>
+            </div>
+            <p class="temperature">${period.temperature}°${period.temperatureUnit}</p>
+            <p class="short-forecast">${period.shortForecast}</p>
+            <p class="detailed-forecast">${period.detailedForecast}</p>
+            <p class="wind">Wind: ${period.windSpeed} ${period.windDirection}</p>
+          </div>
+        `;
+      }
+
+      $('#forecastContent').html(forecastHTML);
     }
 
     function handleError(error) {
@@ -57,25 +89,6 @@
       $('body').addClass('green-background');
     }
   </script>
-  <style>
-    body.red {
-      background-color: red;
-    }
-
-    body.green {
-      background-color: green;
-    }
-
-    body.yellow {
-      background-color: yellow;
-    }
-
-    h1 {
-      color: white;
-      text-align: center;
-      margin-top: 100px;
-    }
-  </style>
 </head>
 
 <body id="body">
@@ -87,11 +100,15 @@
   <div id="no" style="display:none" class="green">
     <h1 class="no"><span style='font-size:100px'>NO!</span></h1>
   </div>
-  <div style="display:none;" id="content">
-    <img src="" id="icon"></img>
-    <div id="weather"></div>
 
+  <button id="toggleForecast">Show Weekly Forecast</button>
+
+
+  <div id="weeklyForecast">
+    <h2>St. Johns Weather Forecast</h2>
+    <div id="forecastContent"></div>
   </div>
+
   <div id="loading"
     style="display:none; position:fixed; top:50%; left:50%; transform:translate(-50%, -50%); z-index:999;"
     class="yellow">
