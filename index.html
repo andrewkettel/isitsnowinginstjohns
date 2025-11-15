@@ -1,119 +1,106 @@
-<html>
+<!DOCTYPE html>
+<html lang="en">
 
 <head>
-  <title>Is it snowing in St. Johns</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description"
+    content="Real-time snow tracking for St. Johns, Portland. Check current conditions and weekly weather forecasts for the St. Johns neighborhood.">
+  <title>Is it Snowing in St. Johns? - Portland Weather Tracker</title>
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2822592648025998"
     crossorigin="anonymous"></script>
   <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
   <link rel="stylesheet" href="index.css" />
-  <script type="text/javascript">
-    // Constants
-    const API_URL = "https://api.weather.gov/gridpoints/PQR/110,107/forecast";
-    const SNOW_WORDS = ["Snow", "Light Snow", "Rain And Snow"];
-
-    $(document).ready(function () {
-      // Show loading GIF when AJAX request starts
-      $.ajaxSetup({
-        beforeSend: function () {
-          $('#loading').show();
-        },
-        complete: function () {
-          $('#loading').hide();
-        }
-      });
-
-      $.ajax({
-        dataType: 'json',
-        url: API_URL,
-        success: function (data) {
-          updateWeather(data);
-        },
-        error: function (jqXHR, textStatus, errorThrown) {
-          handleError(errorThrown);
-        }
-      });
-
-      // Toggle forecast visibility
-      $('#toggleForecast').click(function () {
-        $('#weeklyForecast').slideToggle();
-        $(this).text($(this).text() === 'Show Weekly Forecast' ? 'Hide Weekly Forecast' : 'Show Weekly Forecast');
-      });
-    });
-
-    function updateWeather(data) {
-      const weather = data.properties.periods[0].shortForecast;
-      const isSnowing = SNOW_WORDS.some(word => weather.toLowerCase().includes(word.toLowerCase()));
-
-      if (isSnowing) {
-        $('#yes').show();
-        $('#no').hide();
-        $('body').addClass('red');
-      } else {
-        $('#yes').hide();
-        $('#no').show();
-        $('body').removeClass('red').addClass('green');
-      }
-
-      $('#weatherContent').text(data.properties.periods[0].detailedForecast);
-      $('#icon').attr('src', data.properties.periods[0].icon);
-
-      // Populate weekly forecast
-      const periods = data.properties.periods;
-      let forecastHTML = '';
-
-      for (let i = 0; i < Math.min(periods.length, 14); i++) {
-        const period = periods[i];
-        const hasSnow = SNOW_WORDS.some(word => period.shortForecast.toLowerCase().includes(word.toLowerCase()));
-        const snowIndicator = hasSnow ? '❄️ ' : '';
-
-        forecastHTML += `
-          <div class="forecast-item">
-            <div class="forecast-header">
-              <img src="${period.icon}" alt="${period.shortForecast}" class="forecast-icon">
-              <h3>${snowIndicator}${period.name}</h3>
-            </div>
-            <p class="temperature">${period.temperature}°${period.temperatureUnit}</p>
-            <p class="short-forecast">${period.shortForecast}</p>
-            <p class="detailed-forecast">${period.detailedForecast}</p>
-            <p class="wind">Wind: ${period.windSpeed} ${period.windDirection}</p>
-          </div>
-        `;
-      }
-
-      $('#forecastContent').html(forecastHTML);
-    }
-
-    function handleError(error) {
-      console.error("Error fetching weather data:", error);
-      $('#weatherContent').text("Failed to load weather information. Please try again later.");
-      $('body').addClass('green-background');
-    }
-  </script>
+  <script src="weather.js"></script>
 </head>
 
 <body id="body">
+  <!-- Navigation -->
+  <nav id="mainNav">
+    <div class="nav-container">
+      <a href="index.html" class="nav-logo">❄️ St. Johns Weather</a>
+      <div class="nav-links">
+        <a href="index.html" class="active">Home</a>
+        <a href="about.html">About</a>
+        <a href="winter-guide.html">Winter Guide</a>
+        <a href="privacy.html">Privacy Policy</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Main Answer Section -->
   <div id="yes" style="display:none" class="red">
-    <h1 class="yes"><span style='font-size:250px'>YES!</span><br />
-      <img src="snow.gif" />
+    <h1 class="yes">
+      <span style='font-size:250px'>YES!</span><br />
+      <img src="snow.gif" alt="It's snowing!" />
     </h1>
   </div>
+
   <div id="no" style="display:none" class="green">
     <h1 class="no"><span style='font-size:100px'>NO!</span></h1>
   </div>
 
-  <button id="toggleForecast">Show Weekly Forecast</button>
-
-
-  <div id="weeklyForecast">
-    <h2>St. Johns Weather Forecast</h2>
-    <div id="forecastContent"></div>
+  <!-- Weekly Forecast - Now visible by default -->
+  <div id="weeklyForecast" class="visible">
+    <div class="forecast-container">
+      <h2>St. Johns 7-Day Weather Forecast</h2>
+      <p class="forecast-intro">Plan ahead with our detailed weekly forecast for St. Johns. All data is sourced from the
+        National Weather Service and updated regularly throughout the day.</p>
+      <div id="forecastContent"></div>
+    </div>
   </div>
 
-  <div id="loading"
-    style="display:none; position:fixed; top:50%; left:50%; transform:translate(-50%, -50%); z-index:999;"
-    class="yellow">
-    <img src="winter.gif" alt="Loading..." />
+  <!-- Additional Content for SEO -->
+  <div class="info-section">
+    <div class="content-container">
+      <section class="weather-tips">
+        <h2>Winter Weather in St. Johns</h2>
+        <p>St. Johns typically experiences snow several times each winter season, though accumulation varies
+          significantly year to year. The neighborhood's lower elevation near the Willamette River sometimes means less
+          snow accumulation compared to Portland's west hills.</p>
+
+        <h3>Snow Season Timeline</h3>
+        <p>In the Portland area, snow is most common between December and February, with occasional events in November
+          and March. The National Weather Service monitors conditions closely and issues winter weather advisories when
+          snow is expected.</p>
+
+        <h3>What to Expect During Snow Events</h3>
+        <p>When it does snow in St. Johns, residents should be prepared for:</p>
+        <ul>
+          <li><strong>Road conditions:</strong> Bridge approaches and overpasses freeze first. The St. Johns Bridge can
+            become hazardous quickly.</li>
+          <li><strong>Public transit:</strong> TriMet may reduce or suspend bus service on hills and in adverse
+            conditions.</li>
+          <li><strong>Temperature fluctuations:</strong> Portland snow often occurs near 32°F, leading to freeze-thaw
+            cycles.</li>
+          <li><strong>Mixed precipitation:</strong> Rain, sleet, and freezing rain often accompany or follow snow
+            events.</li>
+        </ul>
+
+        <h3>Staying Informed</h3>
+        <p>This website pulls data directly from the National Weather Service API, ensuring you have access to official
+          forecasts and warnings. We update conditions in real-time, so you can check back anytime to see if snow is
+          currently falling in St. Johns.</p>
+      </section>
+    </div>
   </div>
+
+  <!-- Loading Indicator -->
+  <div id="loading" style="display:none;" class="yellow">
+    <img src="winter.gif" alt="Loading weather data..." />
+  </div>
+
+  <!-- Footer -->
+  <footer>
+    <div class="content-container">
+      <p>&copy; 2024 Is It Snowing in St. Johns. Weather data provided by the National Weather Service.</p>
+      <p>
+        <a href="about.html">About</a> |
+        <a href="privacy.html">Privacy Policy</a> |
+        <a href="winter-guide.html">Winter Preparedness Guide</a>
+      </p>
+    </div>
+  </footer>
 </body>
 
 </html>
